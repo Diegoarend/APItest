@@ -24,7 +24,7 @@ server.use(logRequests);
 //middleware para verificar se a task existe
 function checkTaskExists(req,res,next) {
   const {id}=req.params
-  if (listTasks.filter(task => task.id==id)!==[]){
+  if (!listTasks.find(task => task.id==id)){
       return res.status(400).json({error: 'task not found'})
   }
   return next();
