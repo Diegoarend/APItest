@@ -6,7 +6,22 @@ server.use(express.json())
 
 const listTasks = [ {id:"1", title:"Code Challenge", task:["win"]}]
 
+//middleware global para todas as reqs
 
+function logRequests(req, res, next) {
+  console.time('Request')
+  console.log(`Método: ${req.method}, URL: ${req.url}`);
+  
+  console.count("Número de requisições");
+
+  return next();
+  console.timeEnd('Request')
+}
+
+server.use(logRequests);
+
+
+//middleware para verificar se a task existe
 function checkTaskExists(req,res,next) {
   const {id}=req.params
   if (listTasks.filter(task => task.id==id)!==[]){
@@ -47,7 +62,7 @@ server.post('/tasks', (req,res) => {
 })
 
 //alterando title da task com base no id do parâmetro
-server.put('/tasks/:id', (req,res) => {
+server.put('/tasks/:id',checkTaskExists, (req,res) => {
     const {id}=req.params
     const {title}=req.body
 
@@ -60,14 +75,14 @@ server.put('/tasks/:id', (req,res) => {
 
 //deletando task com base no id 
 
-server.delete('/tasks/:id', (req,res) => {
+server.delete('/tasks/:id',checkTaskExists, (req,res) => {
   const {id}= req.params
   const task = listTasks.findIndex(task => task.id=id)
   listTasks.splice(task,1)
   return res.json(listTasks)
 })
 
-server.post('/tasks/:id/task', (req,res) => {
+server.post('/tasks/:id/task',checkTaskExists, (req,res) => {
   const {id} = req.params 
   const {title} = req.body
   const taskSelected = listTasks.find(task =>task.id=id)
